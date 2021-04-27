@@ -11,5 +11,5 @@ Includes many features and is constantly being updated.
 
 * Fun commands
 * Many moderation commands
-* NSFW
+* NSFW commands
 * Frequent updates
