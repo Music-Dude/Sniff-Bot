@@ -13,7 +13,7 @@ class Triggers(commands.Cog):
             await msg.delete()
 
         if any(trigger in msg.content for trigger in config.triggers):
-            roast = random.choice(config.insults)
+            roast = random.choice(open('insults.txt').readlines())
             await msg.channel.send(roast)
     
     @commands.Cog.listener()
