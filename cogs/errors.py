@@ -12,7 +12,8 @@ class Errors(commands.Cog):
         if isinstance(err, commands.errors.NSFWChannelRequired):
             nsfwEmbed = discord.Embed(
                 title = "NSFW Command",
-                description = err.args[0]
+                description = err.args[0],
+                color=discord.Color.red()
             )
             await ctx.send(embed=nsfwEmbed)
         elif isinstance(err, commands.errors.CommandNotFound):
@@ -24,7 +25,8 @@ class Errors(commands.Cog):
         else:
             errorEm = discord.Embed(
                 title=f'There was an error executing that command:',
-                description=f'```{err}```'
+                description=f'```{err}```',
+                color=discord.Color.red()
             )
             errorEm.set_footer(text='FIX YOUR BOT, Music_Dude!')
             errorEm.set_thumbnail(url='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/53/cross-mark_274c.png')
