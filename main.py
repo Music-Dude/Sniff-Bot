@@ -6,7 +6,9 @@ from pretty_help import PrettyHelp
 bot = commands.Bot(
     command_prefix = '!',
     case_insensitive = True,
-    help_command=PrettyHelp()
+    help_command=PrettyHelp(),
+    intents=discord.Intents().all()
+
 )
 
 for filename in os.listdir('./cogs'):
