@@ -15,6 +15,9 @@ class Triggers(commands.Cog):
         if any(trigger in msg.content for trigger in config.triggers):
             roast = random.choice(open('insults.txt').readlines())
             await msg.channel.send(roast)
+
+        if msg.content.startswith(f'<@!{self.bot.user.id}>'):
+            await msg.channel.send('Use !help for a list of commands')
     
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
