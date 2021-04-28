@@ -55,7 +55,7 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
         em.set_image(url=url)
         await ctx.send(embed=em)
 
-    @commands.command(help='Make a suggestion for Sniff Hub or this bot 😘', aliases=['suggestion'] pass_context=True)
+    @commands.command(help='Make a suggestion for Sniff Hub or this bot 😘', aliases=['suggestion'], pass_context=True)
     async def suggest(self, ctx, *, suggestion=None):
         if suggestion == None:
             await ctx.send('You must provide a suggestion')
