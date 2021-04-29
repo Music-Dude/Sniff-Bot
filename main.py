@@ -17,4 +17,9 @@ for filename in os.listdir('./cogs'):
         print(f'Loading cog {filename}')
         bot.load_extension(f'cogs.{filename}')
 
+@bot.event
+async def on_ready():
+    await bot.change_presence(activity=config.activity)
+    print('Bot is ready.')
+
 bot.run(config.token)

@@ -15,7 +15,7 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
                 color=discord.Color.green()
             )
             msg = await ctx.send(embed=em)
-            await self.bot.change_presence(activity=discord.Game(name="Restarting. . ."))
+            await self.bot.change_presence(activity=discord.Game(name="Reloading. . ."))
             print('Bot is reloading. . .')
             tic = time.perf_counter()
 
@@ -229,20 +229,22 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             em = discord.Embed(
                 title=f'✅ {user} was unbanned after {time} seconds',
                 color= discord.Color.green()
-            )
+            )            
+            if reason != None:
+                em.add_field(name='Reason', value=reason)
             await ctx.send(embed=em)
         except discord.Forbidden:
             await ctx.send('I can\'t ban that user 😢')
 
     @commands.command(help='Ban a member indefinitely', aliases=['yeet'], pass_context=True)
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, user: discord.Member=None, *reason):
+    async def ban(self, ctx, user: discord.Member=None, *, reason=None):
         if user == None:
-            ctx.send('You must provide a user to ban!')
+            await ctx.send('You must provide a user to ban!')
             return
 
         if user.top_role > ctx.author.top_role and ctx.author.id != config.ownerID:
-            ctx.send('You are not high enough in the role hierarchy to ban that user!')
+            await ctx.send('You are not high enough in the role hierarchy to ban that user!')
             return
 
         try:
@@ -251,6 +253,8 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
                 title=f'✅ Successfully banned {user}',
                 color= discord.Color.green()
             )
+            if reason != None:
+                em.add_field(name='Reason', value=reason)
             await ctx.send(embed=em)
         except discord.Forbidden:
             await ctx.send('I can\'t ban that user 😢')
@@ -288,6 +292,10 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
 
         if user.top_role > ctx.author.top_role and ctx.author.id != config.ownerID:
             await ctx.send('You are not high enough in the role hierarchy to change roles for that user!')
+            return
+
+        if role not in ctx.author.roles and ctx.author.id != config.ownerID:
+            await ctx.send('You need to have that role to give it to others!')
             return
 
         if type(role) == str:
@@ -340,7 +348,7 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
     async def nuke(self, ctx, channel: discord.TextChannel=None):
         confirm = await ctx.send('Are you sure? All messages in this channel will be deleted. React with 💣 if you\'d like to continue.')
         await confirm.add_reaction('💣')
-        time.sleep(3)
+        await asyncio.sleep(3)
         confirm = await ctx.fetch_message(confirm.id)
 
         for reaction in confirm.reactions:
@@ -367,7 +375,7 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             channel = ctx.channel
         confirm = await ctx.send(f'<#{channel.id}> will be deleted. React with 💣 if you\'d like to continue.')
         await confirm.add_reaction('💣')
-        time.sleep(3)
+        await asyncio.sleep(3)
         confirm = await ctx.fetch_message(confirm.id)
 
         for reaction in confirm.reactions:

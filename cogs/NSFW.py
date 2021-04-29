@@ -24,11 +24,12 @@ class NSFW(commands.Cog, description='😏'):
         posts = await r34.getImages(Search_Query)
         try:
             post = posts[random.randint(0, len(posts) - 1)]
-            r34Embed = discord.Embed(
+            em = discord.Embed(
                 title=f'Rule 34 results for \'{Search_Query}\''
                 )
-            r34Embed.set_image(url=post.file_url)
-            await ctx.send(embed=r34Embed)
+            em.set_author(name=f'Requested by {ctx.author}', icon_url=ctx.author.avatar_url)
+            em.set_image(url=post.file_url)
+            await ctx.send(embed=em)
 
         except TypeError:
             noResults = discord.Embed(

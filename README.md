@@ -10,6 +10,9 @@ Comprehensive bot made for the [Sniff Hub/CheatX Discord server](https://discord
 Includes many features and is constantly being updated. 
 
 * Fun commands
+* Utility commands
 * Many moderation commands
 * NSFW commands
 * Frequent updates
+
+Feel free to read through the code!
