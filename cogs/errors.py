@@ -22,6 +22,8 @@ class Errors(commands.Cog):
                 description='See !help for a list of commands.'
             )
             await ctx.send(embed=em)
+        elif isinstance(err, commands.errors.UserNotFound or commands.errors.MemberNotFound):
+            await ctx.send('Couldn\'t find that user!')
         else:
             errorEm = discord.Embed(
                 title=f'There was an error executing that command:',

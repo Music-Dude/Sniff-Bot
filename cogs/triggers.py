@@ -1,4 +1,4 @@
-import discord, random, time, config
+import discord, random, time, config, re
 from discord.ext import commands
 from pretty_help import PrettyHelp
 
@@ -8,10 +8,6 @@ class Triggers(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg):
-        if 'nigger' in msg.content or 'nigga' in msg.content:
-            await msg.author.send('YOU CAN\'T SAY THE N WORD THAT\'S RACIST')
-            await msg.delete()
-
         if any(trigger in msg.content for trigger in config.triggers):
             roast = random.choice(open('insults.txt').readlines())
             await msg.channel.send(roast)

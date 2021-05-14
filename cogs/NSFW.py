@@ -37,6 +37,7 @@ class NSFW(commands.Cog, description='😏'):
             )
             await ctx.send(embed=noResults)
 
+
     @commands.command(help='Random hentai GIF')
     @commands.is_nsfw()
     async def hentai(self, ctx):

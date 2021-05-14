@@ -36,24 +36,6 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
         else:
             await ctx.send(f'Only <@{config.ownerID}> can use this command to prevent abuse!')
 
-    @commands.command(help='Restart the entire bot (only Music_Dude can use this)')
-    async def restart(self, ctx):
-        if ctx.author.id == config.ownerID:
-            with ctx.typing():
-                em=discord.Embed(
-                    title='Restarting. . .',
-                    description='Allow up to 5 seconds',
-                    color=discord.Color.green()
-                )
-                msg = await ctx.send(embed=em)
-                await self.bot.change_presence(activity=discord.Game(name="Restarting. . ."))
-                print('Bot is restarting. . .')
-                os.execl(sys.executable, 'python3', './main.py', *sys.argv[1:])
-            print('Bot is back up!')
-
-        else:
-            await ctx.send(f'Only <@{config.ownerID}> can use this command to prevent abuse!')
-
     @commands.command(help='Steals a custom emoji from another server (WIP)')
     @commands.has_permissions(manage_emojis=True)
     async def steal(self, ctx, Emoji: discord.Emoji):
@@ -282,8 +264,9 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
     @commands.command(help='Give a user a role', aliases=['giverole'])
     @commands.has_permissions(manage_roles=True)
     async def role(self, ctx, user: discord.Member=None, *, role=None):
+        print(ctx.author.top_role)
         if user==None:
-            await ctx.send('You must provide a role to give that user!')
+            await ctx.send('You must provide a user to give a role to!')
             return
 
         if role==None:
@@ -292,10 +275,6 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
 
         if user.top_role > ctx.author.top_role and ctx.author.id != config.ownerID:
             await ctx.send('You are not high enough in the role hierarchy to change roles for that user!')
-            return
-
-        if role not in ctx.author.roles and ctx.author.id != config.ownerID:
-            await ctx.send('You need to have that role to give it to others!')
             return
 
         if type(role) == str:
