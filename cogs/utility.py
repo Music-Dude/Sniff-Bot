@@ -1,10 +1,8 @@
 import discord
 import requests
-import config
 from colors import colordict
 from urllib.parse import quote
 from discord.ext import commands
-from pretty_help import PrettyHelp
 
 
 class Utility(commands.Cog, description='Somewhat useful commands'):
@@ -13,17 +11,18 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
 
     @commands.command(help='Gets bot latency', aliases=['latency'])
     async def ping(self, ctx):
-        pingEmbed = discord.Embed(
+        em = discord.Embed(
             title='Pinging. . .',
             description=f'{round(self.bot.latency, 3)}ms',
             color=discord.Color.gold()
         )
-        await ctx.send(embed=pingEmbed)
+        await ctx.send(embed=em)
 
     @commands.command(help='Gets a user\'s profile picture', aliases=['avatar'])
     async def pfp(self, ctx, user: discord.Member = None):
         if user == None:
             user = ctx.author
+
         em = discord.Embed(
             title=f'{user}\'s avatar'
         )
