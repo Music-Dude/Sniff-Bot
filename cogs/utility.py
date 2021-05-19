@@ -9,6 +9,16 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(help="Show current member count", aliases=["membercount"])
+    async def members(self, ctx):
+        em = discord.Embed(
+        title=f"Members in {ctx.guild}",
+        description=f"```{ctx.guild.member_count}```",
+        color=discord.Color.blurple()
+        )
+
+        await ctx.send(embed=em)
+
     @commands.command(help='Gets bot latency', aliases=['latency'])
     async def ping(self, ctx):
         em = discord.Embed(
