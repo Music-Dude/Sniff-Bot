@@ -10,9 +10,7 @@ from datetime import date, datetime
 
 def get_timestamp():
     today = date.today()
-
     timestamp = str(today.strftime("%B %d, %Y"))
-
     return timestamp
 
 
