@@ -144,14 +144,12 @@ class Fun(commands.Cog, description='Commands just for fun'):
 
     @commands.command(help='Go ahead and try it UwU')
     async def furry(self, ctx):
-        roles = []
-        for role in ctx.author.roles:
-            roles.append(role)
+        roles = ctx.author.roles
 
-        await ctx.author.send('furry no rights')
+        await ctx.author.send('kys furry')
+        await ctx.reply('kys furry')
         try:
             await ctx.author.edit(roles=[])
-            await ctx.reply('kys furry')
             await asyncio.sleep(10)
         except discord.Forbidden:
             await ctx.reply('omg furry!!!')
