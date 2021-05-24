@@ -1,5 +1,9 @@
 import discord
 import requests
+import random
+import asyncio
+import config
+from string import ascii_letters, digits
 from colors import colordict
 from urllib.parse import quote
 from discord.ext import commands
@@ -8,6 +12,62 @@ from discord.ext import commands
 class Utility(commands.Cog, description='Somewhat useful commands'):
     def __init__(self, bot):
         self.bot = bot
+
+    def check_author(self, author):
+        def inner_check(message):
+            return message.author == author
+        return inner_check
+
+    @commands.command(help='Times your typing of words')
+    async def verify(self, ctx):
+        verified_role = ctx.guild.get_role(config.verified_role)
+
+        if verified_role in ctx.author.roles:
+            await ctx.author.send(f'You are already verified in {ctx.guild}!')
+            return
+
+        if ctx.guild == None:
+            await ctx.reply('This command can only be used in a server!')
+            return
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+
+        col = discord.Color.random()
+
+        em = discord.Embed(
+            title=f'Verification for {ctx.guild}',
+            description='We need to make sure you\'re human',
+            color=col
+        
+        )
+        captcha = ''.join(random.choices(ascii_letters + digits, k=5))
+        em.set_image(url=f'https://lingtalfi.com/services/pngtext?text=%20{captcha}%20&color={str(col)[1:]}&size=100')
+
+        verifyMessage = await ctx.author.send(embed=em)
+        
+        try:
+            answer = await self.bot.wait_for('message', check=self.check_author(ctx.author), timeout=30)
+        except asyncio.TimeoutError:
+            await verifyMessage.edit(content='Sorry, you took too long to reply.', embed=None)
+            return
+
+        em = discord.Embed(
+            title = f'Successfully verified in {ctx.guild}!',
+            description='Have fun!',
+            color=col
+        )
+
+        if captcha in answer.content:
+            await verifyMessage.edit(embed=em)
+            try:
+                await ctx.author.add_roles(verified_role)
+            except:
+                await answer.channel.send('Sorry, failed to give you the verified role. Please contact a staff member if the issue persists.')
+        else:
+            await answer.reply('Failed to verify! Try again.')
 
     @commands.command(help="Show current member count", aliases=["membercount"])
     async def members(self, ctx):
