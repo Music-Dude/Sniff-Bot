@@ -1,6 +1,7 @@
 import discord
 import os
 import config
+import time
 from datetime import datetime
 from discord.ext import commands
 from pretty_help import PrettyHelp
@@ -13,6 +14,7 @@ bot = commands.Bot(
 
 )
 
+startTime = time.time()
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py') and not filename.startswith('X'):
         filename = filename[:-3]
@@ -24,6 +26,5 @@ for filename in os.listdir('./cogs'):
 async def on_ready():
     await bot.change_presence(activity=config.activity)
     print('Bot is ready.')
-
 
 bot.run(config.token)
