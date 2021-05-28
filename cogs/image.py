@@ -3,12 +3,20 @@ import requests
 import time
 import os
 from discord.ext import commands
-from PIL import Image, ImageOps, ImageDraw, ImageFont
+from PIL import Image, ImageOps, ImageDraw, ImageFont, ImageEnhance
 
 
 class IMG(commands.Cog, description='Commands to create and edit images'):
     def __init__(self, bot):
         self.bot = bot
+
+    def fromURL(self, url):
+        r = requests.get(url, stream=True, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1) AppleWebKit/531.39.5 (KHTML, like Gecko) Version/5.0.2 Safari/531.39.5'})
+        try:
+            return Image.open(r.raw)
+        except:
+            return Image.open(r.content)
 
     @commands.group(description='Create and modify images')
     async def image(self, ctx):
@@ -19,13 +27,15 @@ class IMG(commands.Cog, description='Commands to create and edit images'):
                 color=discord.Color.red()
             )
             await ctx.send(embed=em)
-
-    @image.command(description='WHAT? HOW??')
-    async def what(self, ctx, *text):
-        if not ctx.message.attachments:
-            await ctx.reply('You didn\'t attatch an image to edit!')
             return
 
+        if not ctx.message.attachments:
+            await ctx.reply('You didn\'t attatch an image to edit!')
+            ctx.invoked_subcommand = None
+            return
+
+    @image.command(description='WHAT? HOW?? | Parameters: text1, text2 (optional)\nMUST BE COMMA SEPARATED')
+    async def what(self, ctx, *text):
         imageUrl = ctx.message.attachments[0].url.lower()
         if not imageUrl.endswith(('png', 'jpg', 'webp')):
             await ctx.reply('Inavlid image! It must be in the format PNG, JPG, or WEBP')
@@ -39,12 +49,7 @@ class IMG(commands.Cog, description='Commands to create and edit images'):
         except:
             text2 = ''
 
-        r = requests.get(imageUrl, stream=True, headers={
-            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1) AppleWebKit/531.39.5 (KHTML, like Gecko) Version/5.0.2 Safari/531.39.5'}).raw
-        try:
-            inputFile = Image.open(r.raw)
-        except:
-            inputFile = Image.open(r.content)
+        inputFile = self.fromURL(imageUrl).convert('RGB')
 
         inputFile.thumbnail((400, 300), Image.ANTIALIAS)
         inputFile = ImageOps.expand(inputFile, border=20, fill='black')
@@ -67,6 +72,27 @@ class IMG(commands.Cog, description='Commands to create and edit images'):
         out.paste(inputFile, ((800-imgW)//2, (380-imgH)//2))
         out.save(filename)
 
+        await ctx.send(f'Requested by {ctx.author}', file=discord.File(filename))
+        os.remove(filename)
+
+    @image.command(description='👌👌😂😂😂 | Parameters: value (optional)')
+    async def deepfry(self, ctx, value: int = 10):
+        imageUrl = ctx.message.attachments[0].url.lower()
+        if not imageUrl.endswith(('png', 'jpg', 'webp')):
+            await ctx.reply('Inavlid image! It must be in the format PNG, JPG, or WEBP')
+            return
+
+        value //= 5
+        value = 10 if value > 10 else value
+        value = 1 if value < 1 else value
+
+        inputFile = self.fromURL(imageUrl).convert('RGB')
+        inputFile = ImageEnhance.Color(inputFile).enhance(value)
+        inputFile = ImageEnhance.Sharpness(inputFile).enhance(value*4)
+
+        filename = str(int(time.time())) + '.jpg'
+
+        inputFile.save(filename, quality=10-value)
         await ctx.send(f'Requested by {ctx.author}', file=discord.File(filename))
         os.remove(filename)
 
