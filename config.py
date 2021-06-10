@@ -6,7 +6,7 @@ token = 'your token here'
 prefix = '!'
 # Bot will listen for commands starting with this prefix
 
-activity = discord.Activity(type=2, name=f'{prefix}help')
+activity = discord.Activity(name=f'{prefix}help', type=2)
 # Set this to any status the bot should have on start
 # Types:
 #   1 - Playing ...
