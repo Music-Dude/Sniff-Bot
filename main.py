@@ -7,7 +7,7 @@ from discord.ext import commands
 from pretty_help import PrettyHelp
 
 bot = commands.Bot(
-    command_prefix='!',
+    command_prefix=config.prefix,
     case_insensitive=True,
     help_command=PrettyHelp(),
     intents=discord.Intents().all()
