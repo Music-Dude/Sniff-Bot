@@ -37,16 +37,22 @@ class Errors(commands.Cog):
 
             cooldown_time = convert_time(err)
             await ctx.send(f"This command is on cooldown! Try again in {cooldown_time}")
+        elif isinstance(err, (discord.Forbidden, discord.errors.Forbidden)):
+            em = discord.Embed(
+                title="There was a permissions error executing that command:",
+                description=f'```{err}```'
+            )
+            em.set_footer(text="This means I don\'t have permission to perform this action, or a user has their DMs closed.")
         else:
-            errorEm = discord.Embed(
-                title=f'There was an error executing that command:',
+            em = discord.Embed(
+                title='There was an error executing that command:',
                 description=f'```{err}```',
                 color=discord.Color.red()
             )
-            errorEm.set_footer(text='FIX YOUR BOT, Music_Dude!')
-            errorEm.set_thumbnail(
+            em.set_footer(text='FIX YOUR BOT, Music_Dude!')
+            em.set_thumbnail(
                 url='https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/53/cross-mark_274c.png')
-            await ctx.send(embed=errorEm)
+            await ctx.send(embed=em)
 
 
 def setup(bot):
