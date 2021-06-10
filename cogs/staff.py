@@ -95,27 +95,25 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
 
     @commands.command(help='Changes the bot\'s nickname')
     @commands.has_permissions(manage_nicknames=True)
-    async def botnick(self, ctx, *New_Name):
-        New_Name = ' '.join(New_Name)
+    async def botnick(self, ctx, *new_name):
+        new_name = ' '.join(New_Name)
         try:
-            await ctx.guild.get_member(self.bot.user.id).edit(nick=New_Name)
-            await ctx.send(f'Successfully changed nickname to \"{New_Name}\"')
+            await ctx.guild.get_member(self.bot.user.id).edit(nick=new_name)
+            await ctx.send(f'Successfully changed nickname to \"{new_name}\"')
         except discord.HTTPException:
             await ctx.send('Couldn\'t set nickname to that. Check that the new name is 32 or less characters in length and doesn\'t contain special characters.'
                            )
 
     @commands.command(help='Changes a member\'s nickname')
     @commands.has_permissions(manage_nicknames=True)
-    async def nick(self, ctx, user: discord.Member = None, *New_Name):
+    async def nick(self, ctx, user: discord.Member = None, *new_name):
         if user == None:
             user = ctx.author
 
-        New_Name = ' '.join(New_Name)
+        new_name = ' '.join(new_name)
         try:
-            await user.edit(nick=New_Name)
-            await ctx.send(f'Successfully changed {user}\'s nickname to \"{New_Name}\"')
-        except discord.Forbidden:
-            await ctx.send('I can\'t nickname that user 😢')
+            await user.edit(nick=new_name)
+            await ctx.send(f'Successfully changed {user}\'s nickname to \"{new_name}\"')
         except discord.HTTPException:
             await ctx.send('Couldn\'t set nickname to that. Check that the new name is 32 or less characters in length and doesn\'t contain special characters.')
 
@@ -130,7 +128,6 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             await ctx.send('You are not high enough in the role hierarchy to mute that user!')
             return
 
-        try:
             await user.add_roles(ctx.guild.get_role(config.mute_role))
 
             em = discord.Embed(
@@ -138,13 +135,11 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
                 color=discord.Color.green()
             )
             await ctx.send(embed=em)
-        except discord.Forbidden:
-            await ctx.send('I can\'t mute that user 😢')
 
     @commands.command(help='Mute a member temporarily', pass_context=True)
     @commands.has_permissions(manage_roles=True)
     async def tempmute(self, ctx, user: discord.Member = None, time=None):
-        if user == None:
+        if not user:
             await ctx.send('You must provide a user to mute!')
             return
 
@@ -158,26 +153,21 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             await ctx.send('You are not high enough in the role hierarchy to mute that user!')
             return
 
-        try:
-            await user.add_roles(ctx.guild.get_role(config.mute_role))
+        await user.add_roles(ctx.guild.get_role(config.mute_role))
 
-            em = discord.Embed(
-                title=f'✅ Muted {user} for {time} seconds',
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=em)
+        em = discord.Embed(
+            title=f'✅ Muted {user} for {time} seconds',
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=em)
+        await asyncio.sleep(time)
+        await user.remove_roles(ctx.guild.get_role(config.mute_role))
 
-            await asyncio.sleep(time)
-            await user.remove_roles(ctx.guild.get_role(config.mute_role))
-
-            em = discord.Embed(
-                title=f'✅ {user} was unmuted after {time} seconds',
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=em)
-
-        except discord.Forbidden:
-            await ctx.send('I can\'t mute that user 😢')
+        em = discord.Embed(
+            title=f'✅ {user} was unmuted after {time} seconds',
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=em)
 
     @commands.command(help='Unmute a member', pass_context=True)
     @commands.has_permissions(manage_roles=True)
@@ -190,16 +180,13 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             await ctx.send('You are not high enough in the role hierarchy to unmute that user!')
             return
 
-        try:
-            await user.remove_roles(ctx.guild.get_role(config.mute_role))
+        await user.remove_roles(ctx.guild.get_role(config.mute_role))
 
-            em = discord.Embed(
-                title=f'✅ Unmuted {user}',
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=em)
-        except discord.Forbidden:
-            await ctx.send('I can\'t unmute that user 😢')
+        em = discord.Embed(
+            title=f'✅ Unmuted {user}',
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=em)
 
     @commands.command(help='Kick a member', pass_context=True)
     @commands.has_permissions(kick_members=True)
@@ -213,15 +200,12 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
                 'You are not high enough in the role hierarchy to kick that user!')
             return
 
-        try:
-            await user.kick(reason=reason)
-            em = discord.Embed(
-                title=f'✅ Successfully kicked {user}',
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=em)
-        except discord.Forbidden:
-            await ctx.send('I can\'t kick that user 😢')
+        await user.kick(reason=reason)
+        em = discord.Embed(
+            title=f'✅ Successfully kicked {user}',
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=em)
 
     @commands.command(help='Ban a member temporarily', aliases=['tempyeet'], pass_context=True)
     @commands.has_permissions(ban_members=True)
@@ -241,26 +225,21 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
                 'You are not high enough in the role hierarchy to ban that user!')
             return
 
-        try:
-            await user.ban(reason=reason)
-            em = discord.Embed(
-                title=f'✅ Successfully banned {user} for {time} seconds',
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=em)
-
-            await asyncio.sleep(time)
-            await user.unban()
-
-            em = discord.Embed(
-                title=f'✅ {user} was unbanned after {time} seconds',
-                color=discord.Color.green()
-            )
-            if reason != None:
-                em.add_field(name='Reason', value=reason)
-            await ctx.send(embed=em)
-        except discord.Forbidden:
-            await ctx.send('I can\'t ban that user 😢')
+        await user.ban(reason=reason)
+        em = discord.Embed(
+            title=f'✅ Successfully banned {user} for {time} seconds',
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=em)
+        await asyncio.sleep(time)
+        await user.unban()
+        em = discord.Embed(
+            title=f'✅ {user} was unbanned after {time} seconds',
+            color=discord.Color.green()
+        )
+        if reason != None:
+            em.add_field(name='Reason', value=reason)
+        await ctx.send(embed=em)
 
     @commands.command(help='Ban a member indefinitely', aliases=['yeet'], pass_context=True)
     @commands.has_permissions(ban_members=True)
@@ -273,17 +252,14 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             await ctx.send('You are not high enough in the role hierarchy to ban that user!')
             return
 
-        try:
-            await user.ban(reason=reason)
-            em = discord.Embed(
-                title=f'✅ Successfully banned {user}',
-                color=discord.Color.green()
-            )
-            if reason != None:
-                em.add_field(name='Reason', value=reason)
-            await ctx.send(embed=em)
-        except discord.Forbidden:
-            await ctx.send('I can\'t ban that user 😢')
+        await user.ban(reason=reason)
+        em = discord.Embed(
+            title=f'✅ Successfully banned {user}',
+            color=discord.Color.green()
+        )
+        if reason != None:
+            em.add_field(name='Reason', value=reason)
+        await ctx.send(embed=em)
 
     @commands.command(help='Unban a member')
     @commands.has_permissions(ban_members=True)
