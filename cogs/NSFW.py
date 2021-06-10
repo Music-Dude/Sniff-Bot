@@ -8,29 +8,31 @@ from insultgenerator import phrases
 class NSFW(commands.Cog, description='😏'):
     def __init__(self, bot):
         self.bot = bot
+        self.r34 = Rule34(self.bot.loop)
 
     @commands.command(help='Searches something on Rule34', aliases=['r34'], pass_context=True)
     @commands.is_nsfw()
-    async def rule34(self, ctx, *Search_Query):
-        r34 = Rule34(self.bot.loop)
-        Search_Query = '_'.join(Search_Query)
-        if Search_Query == '':
-            noSearch = discord.Embed(
+    async def rule34(self, ctx, *query):
+        query = '_'.join(query)
+        if not query:
+            em = discord.Embed(
                 title='Please provide a search query'
             )
-            await ctx.send(embed=noSearch)
+            await ctx.send(embed=em)
             return
 
-        posts = await r34.getImages(Search_Query)
+        posts = await self.r34.getImages(query)
         try:
-            post = posts[random.randint(0, len(posts) - 1)]
+            post = random.choice(posts).file_url
+            while not post.endswith(('png', 'jpg', 'gif')):
+                post = random.choice(posts).file_url
+
             em = discord.Embed(
-                title=f'Rule 34 results for \'{Search_Query}\''
+                title=f'Rule 34 results for \'{query}\''
                 )
             em.set_author(name=f'Requested by {ctx.author}', icon_url=ctx.author.avatar_url)
-            em.set_image(url=post.file_url)
+            em.set_image(url=post)
             await ctx.send(embed=em)
-
         except TypeError:
             noResults = discord.Embed(
                 title = 'No results were found'
@@ -49,7 +51,7 @@ class NSFW(commands.Cog, description='😏'):
         hentaiEmbed.set_image(url=res['url'])
         await ctx.send(embed=hentaiEmbed)
 
-    @commands.command(help='Random lewd catgirl GIF', aliases=['catgirl', 'loli'])
+    @commands.command(help='Random neko GIF', aliases=['catgirl'])
     @commands.is_nsfw()
     async def neko(self, ctx):
         r = requests.get("https://nekos.life/api/v2/img/nsfw_neko_gif")
