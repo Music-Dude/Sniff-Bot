@@ -79,31 +79,6 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
         except:
             await ctx.reply("Question and/or answer channels not found. Make sure they have those words, respectively in the names.")
 
-    @commands.command(help='Steals a custom emoji from another server (WIP)')
-    @commands.has_permissions(manage_emojis=True)
-    async def steal(self, ctx, Emoji: discord.Emoji):
-        if not str(Emoji).startswith('<:'):
-            await ctx.send(embed=discord.Embed(title='Argument \'Emoji\' must be a custom emoji!'))
-            return
-        else:
-            stealEm = discord.Embed(
-                title='Stealing this emoji:'
-            )
-            stealEm.set_image(url=Emoji.url)
-            stealEm.set_footer(text='This command is still a WIP')
-            await ctx.send(embed=stealEm)
-
-    @commands.command(help='Changes the bot\'s nickname')
-    @commands.has_permissions(manage_nicknames=True)
-    async def botnick(self, ctx, *new_name):
-        new_name = ' '.join(New_Name)
-        try:
-            await ctx.guild.get_member(self.bot.user.id).edit(nick=new_name)
-            await ctx.send(f'Successfully changed nickname to \"{new_name}\"')
-        except discord.HTTPException:
-            await ctx.send('Couldn\'t set nickname to that. Check that the new name is 32 or less characters in length and doesn\'t contain special characters.'
-                           )
-
     @commands.command(help='Changes a member\'s nickname')
     @commands.has_permissions(manage_nicknames=True)
     async def nick(self, ctx, user: discord.Member = None, *new_name):
