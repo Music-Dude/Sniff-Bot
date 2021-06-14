@@ -3,99 +3,95 @@ import requests
 import time
 import os
 from discord.ext import commands
-from PIL import Image, ImageOps, ImageDraw, ImageFont, ImageEnhance
+from functools import wraps
+from PIL import Image as PILImage
+from PIL import ImageOps, ImageDraw, ImageFont, ImageEnhance
 
 
-class IMG(commands.Cog, description='Commands to create and edit images'):
+times = os.path.join('..', 'resources', 'times.ttf')
+
+
+def image(func):
+    @wraps(func)
+    async def image_inner(self, ctx, *args, **kwargs):
+        if not ctx.message.attachments:
+            await ctx.reply('You didn\'t attatch an image to edit!')
+            return
+
+        imageUrl = ctx.message.attachments[0].url.lower()
+        if not imageUrl.lower().endswith(('png', 'jpg', 'webp', 'gif')):
+            await ctx.reply('Inavlid image! It must be in PNG, JPG, WEBP, or GIF format')
+            return
+
+        r = requests.get(imageUrl, stream=True, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1) AppleWebKit/531.39.5 (KHTML, like Gecko) Version/5.0.2 Safari/531.39.5'})
+        try:
+            img = PILImage.open(r.raw)
+        except:
+            img = PILImage.open(r.content)
+
+        filename = f'{time.time_ns()}.png'
+        await func(img, filename, *args, **kwargs)
+
+        imgfile = discord.File(filename, filename=filename)
+
+        em = discord.Embed(
+            title=f'{func.__name__.title()}-ed Image'
+        )
+        em.set_author(
+            name=f'Requested by {ctx.author}', icon_url=ctx.author.avatar_url)
+        em.set_image(url=f'attachment://{filename}')
+
+        await ctx.send(file=imgfile, embed=em)
+        os.remove(filename)
+
+    return image_inner
+
+
+class Image(commands.Cog, description='Commands to create and edit images'):
     def __init__(self, bot):
         self.bot = bot
 
-    def fromURL(self, url):
-        r = requests.get(url, stream=True, headers={
-            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1) AppleWebKit/531.39.5 (KHTML, like Gecko) Version/5.0.2 Safari/531.39.5'})
-        try:
-            return Image.open(r.raw)
-        except:
-            return Image.open(r.content)
+    @commands.command(help='WHAT? HOW?? | Parameters: text1, text2 (optional)\nMUST BE COMMA SEPARATED')
+    @image
+    async def what(img, filename, *text):
+        text = ' '.join(text).split(',')
+        text1 = text[0].strip()
+        text2 = ','.join(text[1:]).strip()
 
-    @commands.group(description='Create and modify images')
-    async def image(self, ctx):
-        if ctx.invoked_subcommand is None:
-            em = discord.Embed(
-                title='Invalid image command passed!',
-                description='Use !help Image to view a list of commands',
-                color=discord.Color.red()
-            )
-            await ctx.send(embed=em)
-            return
+        img = img.convert('RGB')
+        img.thumbnail((400, 300), PILImage.ANTIALIAS)
+        img = ImageOps.expand(img, border=20, fill='black')
+        img = ImageOps.expand(img, border=2, fill='white')
 
-        if not ctx.message.attachments:
-            await ctx.reply('You didn\'t attatch an image to edit!')
-            ctx.invoked_subcommand = None
-            return
+        font = ImageFont.truetype(times, 90 if text2 == '' else 60)
+        font2 = ImageFont.truetype(times, 40)
 
-    @image.command(description='WHAT? HOW?? | Parameters: text1, text2 (optional)\nMUST BE COMMA SEPARATED')
-    async def what(self, ctx, *text):
-        imageUrl = ctx.message.attachments[0].url.lower()
-        if not imageUrl.endswith(('png', 'jpg', 'webp')):
-            await ctx.reply('Inavlid image! It must be in the format PNG, JPG, or WEBP')
-            return
-
-        filename = str(int(time.time())) + '.jpg'
-        text = ' '.join(text).split(', ')
-        text1 = text[0]
-        try:
-            text2 = text[1]
-        except:
-            text2 = ''
-
-        inputFile = self.fromURL(imageUrl).convert('RGB')
-
-        inputFile.thumbnail((400, 300), Image.ANTIALIAS)
-        inputFile = ImageOps.expand(inputFile, border=20, fill='black')
-        inputFile = ImageOps.expand(inputFile, border=2, fill='white')
-
-        font = ImageFont.truetype(
-            '/usr/share/fonts/truetype/times/times.ttf', 90 if text2 == '' else 60)
-        font2 = ImageFont.truetype(
-            '/usr/share/fonts/truetype/times/times.ttf', 40)
-
-        imgW, imgH = inputFile.size
+        imgW, imgH = img.size
         w = font.getsize(text1)[0]
         w2 = font2.getsize(text2)[0]
 
-        out = Image.new("RGB", (800, 500))
+        out = PILImage.new("RGB", (800, 500))
         draw = ImageDraw.Draw(out)
         draw.text(((800-w)/2, 370), text1, 'white', font)
         draw.text(((800-w2)/2, 430), text2, 'white', font2)
 
-        out.paste(inputFile, ((800-imgW)//2, (380-imgH)//2))
+        out.paste(img, ((800-imgW)//2, (380-imgH)//2))
         out.save(filename)
 
-        await ctx.send(f'Requested by {ctx.author}', file=discord.File(filename))
-        os.remove(filename)
-
-    @image.command(description='👌👌😂😂😂 | Parameters: value (optional)')
-    async def deepfry(self, ctx, value: int = 10):
-        imageUrl = ctx.message.attachments[0].url.lower()
-        if not imageUrl.endswith(('png', 'jpg', 'webp')):
-            await ctx.reply('Inavlid image! It must be in the format PNG, JPG, or WEBP')
-            return
-
+    @commands.command(help='👌👌😂😂😂 | Parameters: value (optional)')
+    @image
+    async def deepfry(img, filename, value: int = 10):
         value //= 5
         value = 10 if value > 10 else value
         value = 1 if value < 1 else value
 
-        inputFile = self.fromURL(imageUrl).convert('RGB')
-        inputFile = ImageEnhance.Color(inputFile).enhance(value)
-        inputFile = ImageEnhance.Sharpness(inputFile).enhance(value*4)
+        img = img.convert('RGB')
+        img = ImageEnhance.Color(img).enhance(value)
+        img = ImageEnhance.Sharpness(img).enhance(value*4)
 
-        filename = str(int(time.time())) + '.jpg'
-
-        inputFile.save(filename, quality=10-value)
-        await ctx.send(f'Requested by {ctx.author}', file=discord.File(filename))
-        os.remove(filename)
+        img.save(filename, quality=10-value)
 
 
 def setup(bot):
-    bot.add_cog(IMG(bot))
+    bot.add_cog(Image(bot))
