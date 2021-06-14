@@ -165,9 +165,10 @@ class Fun(commands.Cog, description='Commands just for fun'):
     async def snipe(self, ctx):
         if self.bot.snipedMessage:
             content = self.bot.snipedMessage.content
+            content = content if content else '** **'
             author = self.bot.snipedMessage.author
             timestamp = str(self.bot.snipedMessage.created_at
-                            ).split('.')[0] + 'UTC'
+                            ).split('.')[0] + ' UTC'
 
             em = discord.Embed(
                 color=discord.Color.random()
