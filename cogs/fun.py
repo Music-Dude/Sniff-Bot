@@ -18,6 +18,11 @@ faker = Faker()
 class Fun(commands.Cog, description='Commands just for fun'):
     def __init__(self, bot):
         self.bot = bot
+        self.reddit = asyncpraw.Reddit(
+            client_id='z0tV5Vb8-xHnYA',
+            client_secret='EgmNP1VmT-IpIMj-7auUMM8E0W0',
+            user_agent='Sniff Bot'
+        )
 
     @commands.command(help='Absolutely roasts someone. (Don\'t use if easily offended!!!)', pass_context=True)
     async def roast(self, ctx, args=None):
@@ -56,74 +61,21 @@ class Fun(commands.Cog, description='Commands just for fun'):
         em.set_image(url=str(r[0]["url"]))
         await ctx.send(embed=em)
 
-    @commands.command(help='Gets a sus image', aliases=['amongus', 'amongdrip', 'sus', 'sussy', 'imposter'])
-    async def amogus(self, ctx):
-        reddit = asyncpraw.Reddit(
-            client_id='z0tV5Vb8-xHnYA',
-            client_secret='EgmNP1VmT-IpIMj-7auUMM8E0W0',
-            user_agent='pythonpraw'
-        )
-
-        subs = ('amogus', 'schizoamogus', 'amongdrip',
-                'whentheimposterissus', 'amogusmemes')
-        subreddit = await reddit.subreddit(random.choice(subs))
-        new = subreddit.new(limit=20)
-
-        posts = [x async for x in new if not x.stickied and x.url.endswith('jpg') or x.url.endswith('png') or x.url.endswith('gif')]
-        post = random.choice(posts)
-        em = discord.Embed(
-            title=post.title,
-            url=f'https://reddit.com{post.permalink}'
-        )
-        em.set_image(url=post.url)
-        em.set_footer(text=f'From r/{subreddit}')
-        await ctx.send(embed=em)
-        await reddit.close()
-
-    @commands.command(help='I\'m going back to monke', aliases=['monkey'])
-    async def monke(self, ctx):
-        reddit = asyncpraw.Reddit(
-            client_id='z0tV5Vb8-xHnYA',
-            client_secret='EgmNP1VmT-IpIMj-7auUMM8E0W0',
-            user_agent='pythonpraw'
-        )
-
-        subs = ('monke', 'monkeys')
-        subreddit = await reddit.subreddit(random.choice(subs))
-        new = subreddit.new(limit=20)
-
-        posts = [x async for x in new if not x.stickied and x.url.endswith('jpg') or x.url.endswith('png') or x.url.endswith('gif')]
-        post = random.choice(posts)
-        em = discord.Embed(
-            title=post.title,
-            url=f'https://reddit.com{post.permalink}'
-        )
-        em.set_author(
-            name=f'Requested by {ctx.author}', icon_url=ctx.author.avatar_url)
-        em.set_image(url=post.url)
-        em.set_footer(text=f'From r/{subreddit}')
-        await ctx.send(embed=em)
-        await reddit.close()
-
     @commands.command(help='Pick a random post from a subreddit', aliases=['subreddit'])
     async def reddit(self, ctx, sub):
-        reddit = asyncpraw.Reddit(
-            client_id='z0tV5Vb8-xHnYA',
-            client_secret='EgmNP1VmT-IpIMj-7auUMM8E0W0',
-            user_agent='pythonpraw'
-        )
-        try:
-            subreddit = await reddit.subreddit(sub)
-            hot = subreddit.hot(limit=20)
+        subreddit = await self.reddit.subreddit(sub, fetch=True)
 
-            posts = [x async for x in hot if not x.stickied and not x.over_18 and x.url.endswith('jpg') or x.url.endswith('png') or x.url.endswith('gif')]
-            post = random.choice(posts)
-        except:
-            await ctx.send('No results. Make sure the subreddit you are requesting exists and isn\'t NSFW.')
-            return
+        if subreddit.over18:
+            raise commands.errors.NSFWChannelRequired(ctx.channel)
+        hot = subreddit.hot(limit=20)
+
+        posts = [x async for x in hot if not x.stickied and x.url.lower().endswith(('jpg', 'png', 'gif'))]
+
+        post = random.choice(posts)
 
         em = discord.Embed(
             title=post.title,
+            color=0xFF5700,
             url=f'https://reddit.com{post.permalink}'
         )
         em.set_author(
@@ -131,7 +83,6 @@ class Fun(commands.Cog, description='Commands just for fun'):
         em.set_image(url=post.url)
         em.set_footer(text=f'From r/{subreddit}')
         await ctx.send(embed=em)
-        await reddit.close()
 
     @commands.command(help='Picks an image of Mr. Potato the cat', aliases=['乐乐的土豆', 'dimden'])
     async def potato(self, ctx):
