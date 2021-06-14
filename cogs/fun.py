@@ -3,8 +3,7 @@ import config
 import random
 import requests
 import asyncpraw
-import os
-import sys
+import re
 import time
 import asyncio
 from discord.ext import commands
@@ -63,9 +62,19 @@ class Fun(commands.Cog, description='Commands just for fun'):
 
     @commands.command(help='Pick a random post from a subreddit', aliases=['subreddit'])
     async def reddit(self, ctx, sub):
-        subreddit = await self.reddit.subreddit(sub, fetch=True)
+        r = requests.get(
+            f'https://reddit.com/r/{sub}.json', headers={'user-agent': 'Sniff Bot'}).text
 
-        if subreddit.over18:
+        try:
+            is_nsfw = re.search(
+                r'(?<=over_18": ).+?(?=,)', r).group() == 'true'
+        except AttributeError:
+            await ctx.reply(embed=discord.Embed(title='That subreddit doesn\'t exist!', description=f'r/{sub} not found.', color=0xff0000))
+            return
+
+        subreddit = await self.reddit.subreddit(sub)
+
+        if is_nsfw and not ctx.channel.is_nsfw():
             raise commands.errors.NSFWChannelRequired(ctx.channel)
         hot = subreddit.hot(limit=20)
 
@@ -84,7 +93,7 @@ class Fun(commands.Cog, description='Commands just for fun'):
         em.set_footer(text=f'From r/{subreddit}')
         await ctx.send(embed=em)
 
-    @commands.command(help='Picks an image of Mr. Potato the cat', aliases=['乐乐的土豆', 'dimden'])
+    @commands.command(help='Picks an image of Mr. Potato the cat', aliases=['乐乐的土豆'])
     async def potato(self, ctx):
         em = discord.Embed(title='Mr. Potato cat picture', color=0xc4beb1)
         em.set_author(
