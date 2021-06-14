@@ -116,7 +116,7 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
         )
         await ctx.send(embed=em)
 
-    @commands.command(help='Gets a user\'s profile picture', aliases=['avatar'])
+    @commands.command(help='Gets a user\'s profile picture', aliases=['av', 'avatar'])
     async def pfp(self, ctx, user: discord.Member = None):
         if user == None:
             user = ctx.author
