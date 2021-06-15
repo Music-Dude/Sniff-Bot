@@ -42,7 +42,8 @@ class Errors(commands.Cog):
                 title="There was a permissions error executing that command:",
                 description=f'```{err}```'
             )
-            em.set_footer(text="This means I don\'t have permission to perform this action, or a user has their DMs closed.")
+            em.set_footer(
+                text="This means I don\'t have permission to perform this action, or a user has their DMs closed.")
         else:
             em = discord.Embed(
                 title='There was an error executing that command:',

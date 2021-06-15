@@ -103,13 +103,13 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             await ctx.send('You are not high enough in the role hierarchy to mute that user!')
             return
 
-            await user.add_roles(ctx.guild.get_role(config.mute_role))
+        await user.add_roles(ctx.guild.get_role(config.roles['muted']))
 
-            em = discord.Embed(
-                title=f'✅ Muted {user}',
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=em)
+        em = discord.Embed(
+            title=f'✅ Muted {user}',
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=em)
 
     @commands.command(help='Mute a member temporarily', pass_context=True)
     @commands.has_permissions(manage_roles=True)
@@ -128,7 +128,7 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             await ctx.send('You are not high enough in the role hierarchy to mute that user!')
             return
 
-        await user.add_roles(ctx.guild.get_role(config.mute_role))
+        await user.add_roles(ctx.guild.get_role(config.roles['muted']))
 
         em = discord.Embed(
             title=f'✅ Muted {user} for {time} seconds',
@@ -136,7 +136,7 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
         )
         await ctx.send(embed=em)
         await asyncio.sleep(time)
-        await user.remove_roles(ctx.guild.get_role(config.mute_role))
+        await user.remove_roles(ctx.guild.get_role(config.roles['muted']))
 
         em = discord.Embed(
             title=f'✅ {user} was unmuted after {time} seconds',
@@ -155,7 +155,7 @@ class Staff(commands.Cog, description='Admin/moderation commands'):
             await ctx.send('You are not high enough in the role hierarchy to unmute that user!')
             return
 
-        await user.remove_roles(ctx.guild.get_role(config.mute_role))
+        await user.remove_roles(ctx.guild.get_role(config.roles['muted']))
 
         em = discord.Embed(
             title=f'✅ Unmuted {user}',

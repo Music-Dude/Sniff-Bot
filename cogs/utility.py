@@ -30,8 +30,8 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
             return message.author == author
         return inner_check
 
-    @commands.command(help='Show information about the bot', aliases=['info', 'botinfo'])
-    async def bot(self, ctx):
+    @commands.command(help='Show information about the bot', aliases=['info', 'bot'])
+    async def botinfo(self, ctx):
         em = discord.Embed(
             title='Bot Info',
             color=discord.Color.random()
@@ -45,7 +45,7 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
 
     @commands.command(help='Verify yourself in the server')
     async def verify(self, ctx):
-        verified_role = ctx.guild.get_role(config.verified_role)
+        verified_role = ctx.guild.get_role(config.roles['verified'])
 
         if verified_role in ctx.author.roles:
             await ctx.author.send(f'You are already verified in {ctx.guild}!')
@@ -140,32 +140,31 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
             url='https://static.currency.com/img/media/bitcoin.dd8a16.png')
         await ctx.send(embed=em)
 
-    @commands.command(help='Make a suggestion for Sniff Hub or this bot 😘', aliases=['suggestion'], pass_context=True)
+    @commands.command(help='Make a suggestion for the server or this bot 😘', aliases=['suggestion'], pass_context=True)
     async def suggest(self, ctx, *, suggestion=None):
-        if suggestion == None:
+        if not suggestion:
             await ctx.send('You must provide a suggestion')
             return
-        for channel in ctx.guild.channels:
-            if str(channel).lower() == 'suggestions':
-                em = discord.Embed(
-                    title=f'Suggestion',
-                    description=f'*{suggestion}*',
-                    color=discord.Color.blurple()
-                )
-                em.set_author(
-                    name=f'Suggestion from {ctx.author}', icon_url=ctx.author.avatar_url)
-                sug = await channel.send(embed=em)
-                await sug.add_reaction('👍')
-                await sug.add_reaction('👎')
 
-                emb = discord.Embed(
-                    description=f'Successfully sent suggestion in <#{channel.id}>',
-                    color=discord.Color.green()
-                )
-                await ctx.send(embed=emb)
-                return
+	channel = self.bot.get_channel(config.channels['suggestions'])
 
-        ctx.send('Suggestions channel not found.')
+	em = discord.Embed(
+		title=f'Suggestion',
+		description=f'*{suggestion}*',
+		color=discord.Color.blurple()
+	)
+	em.set_author(
+		name=f'Suggestion from {ctx.author}', icon_url=ctx.author.avatar_url)
+	suggestMsg = await channel.send(embed=em)
+	await suggestMsg.add_reaction('👍')
+	await suggestMsg.add_reaction('👎')
+
+	em = discord.Embed(
+		description=f'Successfully sent suggestion in <#{channel.id}>',
+		color=discord.Color.green()
+	)
+	await ctx.send(embed=em)
+	return
 
 
 def setup(bot):

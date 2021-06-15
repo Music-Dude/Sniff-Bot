@@ -115,7 +115,7 @@ class Fun(commands.Cog, description='Commands just for fun'):
         except discord.Forbidden:
             await ctx.reply('omg furry!!!')
 
-        muterole = ctx.guild.get_role(config.mute_role)
+        muterole = ctx.guild.get_role(config.roles['muted'])
         await ctx.author.add_roles(muterole)
         await ctx.author.edit(roles=roles)
 
