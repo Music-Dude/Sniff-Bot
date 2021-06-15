@@ -20,8 +20,11 @@ class Fun(commands.Cog, description='Commands just for fun'):
         self.reddit = asyncpraw.Reddit(
             client_id='z0tV5Vb8-xHnYA',
             client_secret='EgmNP1VmT-IpIMj-7auUMM8E0W0',
-            user_agent='Sniff Bot'
+            user_agent='Sniff_Bot'
         )
+        self.nsfwsubs = {'porn', 'nsfw', 'gonewild', 'garfieldporn'}
+        # Store nsfw and sfw subreddits while bot is on to avoid unnecessary requests
+        self.sfwsubs = {'memes', 'funny'}
 
     @commands.command(help='Absolutely roasts someone. (Don\'t use if easily offended!!!)', pass_context=True)
     async def roast(self, ctx, args=None):
@@ -62,24 +65,31 @@ class Fun(commands.Cog, description='Commands just for fun'):
 
     @commands.command(help='Pick a random post from a subreddit', aliases=['subreddit'])
     async def reddit(self, ctx, sub):
-        r = requests.get(
-            f'https://reddit.com/r/{sub}.json', headers={'user-agent': 'Sniff Bot'}).text
+        if sub in self.nsfwsubs:
+            is_nsfw = True
+        elif sub in self.sfwsubs:
+            if_nsfw = False
+        else:
+            r = requests.get(
+                f'https://reddit.com/r/{sub}.json', headers={'user-agent': 'Sniff Bot'}).text
+            try:
+                is_nsfw = re.search(
+                    r'(?<=over_18": ).+?(?=,)', r).group() == 'true'
+            except AttributeError:
+                await ctx.reply(embed=discord.Embed(title='That subreddit doesn\'t exist!', description=f'r/{sub} not found.', color=0xff0000))
+                return
 
-        try:
-            is_nsfw = re.search(
-                r'(?<=over_18": ).+?(?=,)', r).group() == 'true'
-        except AttributeError:
-            await ctx.reply(embed=discord.Embed(title='That subreddit doesn\'t exist!', description=f'r/{sub} not found.', color=0xff0000))
-            return
-
-        subreddit = await self.reddit.subreddit(sub)
+            if is_nsfw:
+                self.nsfwsubs.add(sub)
+            else:
+                self.sfwsubs.add(sub)
 
         if is_nsfw and not ctx.channel.is_nsfw():
             raise commands.errors.NSFWChannelRequired(ctx.channel)
+
+        subreddit = await self.reddit.subreddit(sub)
         hot = subreddit.hot(limit=20)
-
         posts = [x async for x in hot if not x.stickied and x.url.lower().endswith(('jpg', 'png', 'gif'))]
-
         post = random.choice(posts)
 
         em = discord.Embed(
