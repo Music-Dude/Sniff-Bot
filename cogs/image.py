@@ -10,9 +10,8 @@ from functools import wraps
 from PIL import Image as PILImage
 from PIL import ImageOps, ImageDraw, ImageFont, ImageEnhance
 
-
-times = os.path.join('..', 'resources', 'times')
-impact = os.path.join('..', 'resources', 'impact')
+impact = os.path.abspath(os.path.join('resources', 'impact.ttf'))
+times = os.path.abspath(os.path.join('resources', 'times.ttf'))
 
 
 def image(func):
@@ -82,21 +81,21 @@ class Image(commands.Cog, description='Commands to create and edit images'):
         em.set_image(url=url)
         await ctx.send(embed=em)
 
-    @commands.command(help='Caption an image')
+    @commands.command(help='Caption an image', pass_context=True)
     @image
-    async def caption(img, filename, *text):
+    async def caption(img, filename, *, text='YOUR TEXT, YOUR TEXT HERE'):
         text = ' '.join(text).split(',')
         text1 = text[0].strip()
         text2 = ','.join(text[1:]).strip()
 
-        img = img.convert('RGB')
+        img = img.convert('RGBA')
         imgW, imgH = img.size
 
-        fontsize = imgH//12
+        fontsize = imgH//11
         font = ImageFont.truetype(impact, fontsize)
 
-        charW, charH = font.getsize('A')
-        charsPerLine = imgW//charW*1.5
+        charW, charH = font.getsize('I')
+        charsPerLine = imgW//charW
         top = textwrap.wrap(text1, width=charsPerLine, break_long_words=False)
         bottom = textwrap.wrap(text2, width=charsPerLine,
                                break_long_words=False)
@@ -107,14 +106,16 @@ class Image(commands.Cog, description='Commands to create and edit images'):
         for line in top:
             line_width, line_height = font.getsize(line)
             x = (imgW - line_width)/2
-            draw.text((x, y), line, fill='white', font=font)
+            draw.text((x, y), line, fill='white', font=font,
+                      stroke_width=imgH//100, stroke_fill='black')
             y += line_height
 
         y = imgH - charH * len(bottom) - 15
         for line in bottom:
             line_width, line_height = font.getsize(line)
             x = (imgW - line_width)/2
-            draw.text((x, y), line, fill='white', font=font)
+            draw.text((x, y), line, fill='white', font=font,
+                      stroke_width=imgH//100, stroke_fill='black')
             y += line_height
 
         img.save(filename)
