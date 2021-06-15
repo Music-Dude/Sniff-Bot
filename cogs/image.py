@@ -2,6 +2,8 @@ import discord
 import requests
 import time
 import os
+from colors import colordict
+from urllib.parse import quote
 from discord.ext import commands
 from functools import wraps
 from PIL import Image as PILImage
@@ -9,6 +11,7 @@ from PIL import ImageOps, ImageDraw, ImageFont, ImageEnhance
 
 
 times = os.path.join('..', 'resources', 'times.ttf')
+impact = os.path.join('..', 'resources', 'impact.ttf')
 
 
 def image(func):
@@ -52,7 +55,38 @@ class Image(commands.Cog, description='Commands to create and edit images'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(help='WHAT? HOW?? | Parameters: text1, text2 (optional)\nMUST BE COMMA SEPARATED')
+    @commands.command(help='Render text as a PNG image', pass_context=True)
+    async def text(self, ctx, *, args='Your text here, ffffff'):
+        try:
+            args = args.split(',')
+
+            for x, arg in enumerate(args):
+                args[x] = arg.strip()
+
+            text = args[0]
+
+        except:
+            await ctx.send('Couldn\'t get an image for that. Make sure everything is formatted like this:\n`!text Your text here, color`')
+            return
+
+        try:
+            color = colordict[args[1].lower()]
+        except:
+            color = 'ffffff'
+
+        em = discord.Embed(
+            title='Generated text',
+            color=int(hex(int(color, 16)), 0)
+        )
+
+        em.set_author(
+            name=f'Requested by {ctx.author}', icon_url=ctx.author.avatar_url)
+
+        url = f'https://lingtalfi.com/services/pngtext?text=%20{quote(text)}%20&color={color}&size=100'
+        em.set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command(help='WHAT? HOW??')
     @image
     async def what(img, filename, *text):
         text = ' '.join(text).split(',')
@@ -60,7 +94,7 @@ class Image(commands.Cog, description='Commands to create and edit images'):
         text2 = ','.join(text[1:]).strip()
 
         img = img.convert('RGB')
-        img.thumbnail((400, 300), PILImage.ANTIALIAS)
+        img.thumbnail((700, 320), PILImage.ANTIALIAS)
         img = ImageOps.expand(img, border=20, fill='black')
         img = ImageOps.expand(img, border=2, fill='white')
 
@@ -79,7 +113,7 @@ class Image(commands.Cog, description='Commands to create and edit images'):
         out.paste(img, ((800-imgW)//2, (380-imgH)//2))
         out.save(filename)
 
-    @commands.command(help='👌👌😂😂😂 | Parameters: value (optional)')
+    @commands.command(help='👌👌😂😂😂')
     @image
     async def deepfry(img, filename, value: int = 10):
         value //= 5

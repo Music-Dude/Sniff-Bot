@@ -8,8 +8,6 @@ import psutil
 import main
 from datetime import datetime
 from string import ascii_letters, digits
-from colors import colordict
-from urllib.parse import quote
 from discord.ext import commands
 
 
@@ -126,37 +124,6 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
         )
         em.set_footer(text=f'Requested by {ctx.author}')
         em.set_image(url=user.avatar_url)
-        await ctx.send(embed=em)
-
-    @commands.command(help='Render text as a PNG image', pass_context=True)
-    async def text(self, ctx, *, args='Your text here, ffffff'):
-        try:
-            args = args.split(',')
-
-            for x, arg in enumerate(args):
-                args[x] = arg.strip()
-
-            text = args[0]
-
-        except:
-            await ctx.send('Couldn\'t get an image for that. Make sure everything is formatted like this:\n`!text Your text here, color`')
-            return
-
-        try:
-            color = colordict[args[1].lower()]
-        except:
-            color = 'ffffff'
-
-        em = discord.Embed(
-            title='Generated text',
-            color=int(hex(int(color, 16)), 0)
-        )
-
-        em.set_author(
-            name=f'Requested by {ctx.author}', icon_url=ctx.author.avatar_url)
-
-        url = f'https://lingtalfi.com/services/pngtext?text=%20{quote(text)}%20&color={color}&size=100'
-        em.set_image(url=url)
         await ctx.send(embed=em)
 
     @commands.command(help='Gets the current BTC price', aliases=['bitcoin'])
