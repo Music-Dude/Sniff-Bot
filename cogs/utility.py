@@ -146,25 +146,25 @@ class Utility(commands.Cog, description='Somewhat useful commands'):
             await ctx.send('You must provide a suggestion')
             return
 
-	channel = self.bot.get_channel(config.channels['suggestions'])
+        channel = self.bot.get_channel(config.channels['suggestions'])
 
-	em = discord.Embed(
-		title=f'Suggestion',
-		description=f'*{suggestion}*',
-		color=discord.Color.blurple()
-	)
-	em.set_author(
-		name=f'Suggestion from {ctx.author}', icon_url=ctx.author.avatar_url)
-	suggestMsg = await channel.send(embed=em)
-	await suggestMsg.add_reaction('👍')
-	await suggestMsg.add_reaction('👎')
+        em = discord.Embed(
+            title=f'Suggestion',
+            description=f'*{suggestion}*',
+            color=discord.Color.blurple()
+        )
+        em.set_author(
+            name=f'Suggestion from {ctx.author}', icon_url=ctx.author.avatar_url)
+        suggestMsg = await channel.send(embed=em)
+        await suggestMsg.add_reaction('👍')
+        await suggestMsg.add_reaction('👎')
 
-	em = discord.Embed(
-		description=f'Successfully sent suggestion in <#{channel.id}>',
-		color=discord.Color.green()
-	)
-	await ctx.send(embed=em)
-	return
+        em = discord.Embed(
+            description=f'Successfully sent suggestion in <#{channel.id}>',
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=em)
+        return
 
 
 def setup(bot):

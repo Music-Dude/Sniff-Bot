@@ -31,7 +31,11 @@ def image(func):
         try:
             img = PILImage.open(r.raw)
         except:
-            img = PILImage.open(r.content)
+            img = PILImage.frombytes(r.content)
+
+        wpercent = (1280/float(img.size[0]))
+        hsize = int((float(img.size[1])*float(wpercent)))
+        img = img.resize((1280, hsize), PILImage.LANCZOS)
 
         filename = f'{time.time_ns()}.png'
         await func(img, filename, *args, **kwargs)
@@ -91,11 +95,11 @@ class Image(commands.Cog, description='Commands to create and edit images'):
         img = img.convert('RGBA')
         imgW, imgH = img.size
 
-        fontsize = imgH//11
+        fontsize = imgH//12
         font = ImageFont.truetype(impact, fontsize)
 
-        charW, charH = font.getsize('I')
-        charsPerLine = imgW//charW
+        charW, charH = font.getsize('A')
+        charsPerLine = imgW//charW*2
         top = textwrap.wrap(text1, width=charsPerLine, break_long_words=False)
         bottom = textwrap.wrap(text2, width=charsPerLine,
                                break_long_words=False)
@@ -128,7 +132,7 @@ class Image(commands.Cog, description='Commands to create and edit images'):
         text2 = ','.join(text[1:]).strip()
 
         img = img.convert('RGB')
-        img.thumbnail((700, 320), PILImage.ANTIALIAS)
+        img.thumbnail((700, 320))
         img = ImageOps.expand(img, border=20, fill='black')
         img = ImageOps.expand(img, border=2, fill='white')
 
